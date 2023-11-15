@@ -34,49 +34,81 @@ public class ProjectController
     public ResponseEntity listAll()
     {
         Map returnData = new HashMap<String, Object>();
-        returnData.put("data", projectRepository.findAll());
+        try 
+        {
+            returnData.put("data", projectRepository.findAll());
+        } 
+        catch (Exception e) 
+        {
+            returnData.put("message", e.getMessage());
+            return new ResponseEntity(returnData, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return new ResponseEntity(returnData, HttpStatus.OK);
     }
     @PostMapping
     public ResponseEntity create(@RequestBody Project newProject)
     {
         Map returnData = new HashMap<String, Object>();
-        returnData.put("data", projectRepository.save(newProject));
+        try 
+        {
+            returnData.put("data", projectRepository.save(newProject));
+        } 
+        catch (Exception e) 
+        {
+            returnData.put("message", e.getMessage());
+            return new ResponseEntity(returnData, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return new ResponseEntity(returnData, HttpStatus.CREATED);
     }
     @PatchMapping
     public ResponseEntity update(@RequestBody Project newProject) 
     {
         Map returnData = new HashMap<String, Object>();
-        if(!hasId(newProject))
+        try 
         {
-            returnData.put("message", "Id cannot be null");
-            return new ResponseEntity(returnData, HttpStatus.PRECONDITION_FAILED);
+            if(!hasId(newProject))
+            {
+                returnData.put("message", "Id cannot be null");
+                return new ResponseEntity(returnData, HttpStatus.PRECONDITION_FAILED);
+            }
+            returnData.put("data", projectRepository.save(newProject));
+        } 
+        catch (Exception e) 
+        {
+            returnData.put("message", e.getMessage());
+            return new ResponseEntity(returnData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        returnData.put("data", projectRepository.save(newProject));
         return new ResponseEntity(returnData, HttpStatus.OK);
     }
     @DeleteMapping
     public ResponseEntity delete(@RequestBody Project projectToDelete) 
     {
         Map returnData = new HashMap<String, Object>();
-        if(!hasId(projectToDelete))
+        try 
         {
-            returnData.put("message", "Id cannot be null");
-            return new ResponseEntity(returnData, HttpStatus.PRECONDITION_FAILED);
-        }
-        Optional<Project> projectOptional = projectRepository.findById(projectToDelete.getId());
-        if(!projectOptional.isPresent())
+            if(!hasId(projectToDelete))
+            {
+                returnData.put("message", "Id cannot be null");
+                return new ResponseEntity(returnData, HttpStatus.PRECONDITION_FAILED);
+            }
+            Optional<Project> projectOptional = projectRepository.findById(projectToDelete.getId());
+            if(!projectOptional.isPresent())
+            {
+                returnData.put("message", "Project not found");
+                return new ResponseEntity(returnData, HttpStatus.NOT_FOUND);
+            }
+            Project parentProject = projectOptional.get();
+            for(Task existingTask : parentProject.getTasks())
+            {
+                taskRepository.delete(existingTask);
+            }
+            projectRepository.delete(projectToDelete);
+        } 
+        catch (Exception e) 
         {
-            returnData.put("message", "Project not found");
-            return new ResponseEntity(returnData, HttpStatus.NOT_FOUND);
+            returnData.put("message", e.getMessage());
+            return new ResponseEntity(returnData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        Project parentProject = projectOptional.get();
-        for(Task existingTask : parentProject.getTasks())
-        {
-            taskRepository.delete(existingTask);
-        }
-        projectRepository.delete(projectToDelete);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
     public static Boolean hasId(Project taskToVerify)
