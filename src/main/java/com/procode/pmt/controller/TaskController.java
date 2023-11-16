@@ -70,7 +70,7 @@ public class TaskController
             projectRepository.save(parentProject);
             List<Task> tasks = new ArrayList<Task>();
             tasks.add(newTask);
-            returnData.put("data", tasks);
+            returnData.put("data", newTask);
         } 
         catch (Exception e) 
         {
@@ -104,13 +104,23 @@ public class TaskController
             }
             if(existingTask.getProjectId() != taskToUpdate.getProjectId())
             {
-                returnData.put("message", "It's not possible to change the Task's Project.");
+                returnData.put("message", "It's not possible to change the Task's Project");
                 return new ResponseEntity(returnData, HttpStatus.BAD_REQUEST);
             }
+            Optional<Project> projectOptional = projectRepository.findById(taskToUpdate.getProjectId());
+            if(!projectOptional.isPresent())
+            {
+                returnData.put("message", "Project not found");
+                return new ResponseEntity(returnData, HttpStatus.NOT_FOUND);
+            }
+            Project parentProject = projectOptional.get();
+            taskToUpdate.setParentProject(parentProject);
+            taskToUpdate = taskRepository.save(taskToUpdate);
+            projectRepository.save(parentProject);
             taskToUpdate = taskRepository.save(taskToUpdate);
             List<Task> tasks = new ArrayList<Task>();
             tasks.add(taskToUpdate);
-            returnData.put("data", tasks);
+            returnData.put("data", taskToUpdate);
         } 
         catch (Exception e) 
         {
