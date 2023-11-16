@@ -115,7 +115,7 @@ Para iniciar a API, entra na nova aba da Extensão Spring Boot Dashboard e inici
 <div align="center">
   <img src="images/SpringBootDashboard.png" alt="Spring Boot Dashboard" width="380" height="410">
 </div>
-
+<br/>
 Após isso, utilize o [Postman](https://www.postman.com/) para chamar as APIs. O endpoint base é o http://localhost:8080. O ProCode disponibiliza 8 APIs para uso completo de suas funcionalidades, são estas: Listar Projetos, Criar um Projeto, Atualizar um Projeto, Deletar um Projeto, Listar Tarefas, Criar uma Tarefa, Atualizar uma Tarefa, Deletar uma Tarefa.
 
 #### Módulo de Projetos: 
